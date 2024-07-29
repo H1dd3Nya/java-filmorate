@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,12 +17,12 @@ import java.util.Map;
 @Slf4j
 public class FilmController {
     private final Map<Long, Film> films = new HashMap<>();
-    long counter = 0L;
+    private long counter = 0L;
 
     @GetMapping
     public List<Film> getAll() {
         log.info("Started collecting films");
-        return films.values().stream().toList();
+        return new ArrayList<>(films.values());
     }
 
     @PostMapping

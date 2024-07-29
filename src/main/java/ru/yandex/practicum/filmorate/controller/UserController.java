@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class UserController {
     @GetMapping
     public List<User> getAll() {
         log.info("Started collecting users");
-        return users.values().stream().toList();
+        return new ArrayList<>(users.values());
     }
 
     @PostMapping
