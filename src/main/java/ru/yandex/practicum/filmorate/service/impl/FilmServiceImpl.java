@@ -48,7 +48,7 @@ public class FilmServiceImpl implements FilmService {
     public Film addLike(Long filmId, Long userId) {
         Film film = filmStorage.get(filmId).orElseThrow(() -> new NotFoundException("Film not found"));
 
-        if (isUserExist(userId)) {
+        if (!isUserExist(userId)) {
             throw new NotFoundException("User not found");
         }
 
@@ -62,7 +62,7 @@ public class FilmServiceImpl implements FilmService {
     public Film removeLike(Long filmId, Long userId) {
         Film film = filmStorage.get(filmId).orElseThrow(() -> new NotFoundException("Film not found"));
 
-        if (isUserExist(userId)) {
+        if (!isUserExist(userId)) {
             throw new NotFoundException("User not found");
         }
 

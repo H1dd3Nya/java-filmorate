@@ -7,9 +7,9 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl;
-import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FilmServiceImplTest {
 
-    private final UserServiceImpl userServiceImpl = new UserServiceImpl(new InMemoryUserStorage());
+    private final UserStorage userStorage = new InMemoryUserStorage();
     private final FilmService filmServiceImpl = new FilmServiceImpl(new InMemoryFilmStorage(),
-            new InMemoryUserStorage());
+            userStorage);
 
     public static void assertEqualsFilms(Film expected, Film actual) {
         assertEquals(expected.getId(), actual.getId());
@@ -130,7 +130,7 @@ class FilmServiceImplTest {
         user.setName("Test Testovich");
         user.setBirthday(LocalDate.of(1995, 3, 22));
         film = filmServiceImpl.create(film);
-        user = userServiceImpl.create(user);
+        user = userStorage.create(user);
 
         filmServiceImpl.addLike(film.getId(), user.getId());
 
@@ -152,7 +152,7 @@ class FilmServiceImplTest {
         user.setName("Test Testovich");
         user.setBirthday(LocalDate.of(1995, 3, 22));
         film = filmServiceImpl.create(film);
-        user = userServiceImpl.create(user);
+        user = userStorage.create(user);
         filmServiceImpl.addLike(film.getId(), user.getId());
 
         filmServiceImpl.removeLike(film.getId(), user.getId());
@@ -183,8 +183,8 @@ class FilmServiceImplTest {
         user2.setEmail("test2@gmail.com");
         user2.setName("Test2 Testovik");
         user2.setBirthday(LocalDate.of(1997, 8, 11));
-        user1 = userServiceImpl.create(user1);
-        user2 = userServiceImpl.create(user2);
+        user1 = userStorage.create(user1);
+        user2 = userStorage.create(user2);
         filmServiceImpl.create(film1);
         filmServiceImpl.create(film2);
 
