@@ -5,10 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -49,15 +46,10 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     public void delete(User user) {
-        if (users.get(user.getId()) == null) {
-            log.warn("User with id: {} does not exist", user.getId());
-            throw new NotFoundException("User not found");
-        }
-
         users.remove(user.getId());
     }
 
-    public User getUser(Long id) {
-        return users.get(id);
+    public Optional<User> get(Long id) {
+        return Optional.ofNullable(users.get(id));
     }
 }

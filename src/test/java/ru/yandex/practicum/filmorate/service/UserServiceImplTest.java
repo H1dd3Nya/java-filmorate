@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
@@ -11,9 +12,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class UserServiceTest {
+class UserServiceImplTest {
 
-    private final UserService userService = new UserService(new InMemoryUserStorage());
+    private final UserServiceImpl userServiceImpl = new UserServiceImpl(new InMemoryUserStorage());
 
     @Test
     @DisplayName("Создание пользователя")
@@ -24,10 +25,10 @@ class UserServiceTest {
         user.setEmail("test@123.com");
         user.setBirthday(LocalDate.of(1990, 11, 4));
 
-        userService.create(user);
+        userServiceImpl.create(user);
 
-        assertEquals(1, userService.getAll().size());
-        assertEqualsUsers(user, userService.get(1L));
+        assertEquals(1, userServiceImpl.getAll().size());
+        assertEqualsUsers(user, userServiceImpl.get(1L));
     }
 
     @Test
@@ -38,9 +39,9 @@ class UserServiceTest {
         user.setLogin("Test123");
         user.setEmail("test@123.com");
         user.setBirthday(LocalDate.of(1990, 11, 4));
-        userService.create(user);
+        userServiceImpl.create(user);
 
-        User userFromService = userService.get(1L);
+        User userFromService = userServiceImpl.get(1L);
 
         assertEqualsUsers(user, userFromService);
     }
@@ -53,11 +54,11 @@ class UserServiceTest {
         user.setLogin("Test123");
         user.setEmail("test@123.com");
         user.setBirthday(LocalDate.of(1990, 11, 4));
-        user = userService.create(user);
+        user = userServiceImpl.create(user);
 
         user.setEmail("test2@gmail.com");
         user.setLogin("test0vich111");
-        User userFromService = userService.update(user);
+        User userFromService = userServiceImpl.update(user);
 
         assertEqualsUsers(user, userFromService);
     }
@@ -70,11 +71,11 @@ class UserServiceTest {
         user.setLogin("Test123");
         user.setEmail("test@123.com");
         user.setBirthday(LocalDate.of(1990, 11, 4));
-        userService.create(user);
+        userServiceImpl.create(user);
 
-        userService.delete(user);
+        userServiceImpl.delete(user);
 
-        assertEquals(0, userService.getAll().size());
+        assertEquals(0, userServiceImpl.getAll().size());
     }
 
     @Test
@@ -90,13 +91,13 @@ class UserServiceTest {
         user2.setLogin("Test456");
         user2.setEmail("test@456.com");
         user2.setBirthday(LocalDate.of(1990, 11, 4));
-        userService.create(user);
-        userService.create(user2);
+        userServiceImpl.create(user);
+        userServiceImpl.create(user2);
 
-        userService.addFriend(user.getId(), user2.getId());
+        userServiceImpl.addFriend(user.getId(), user2.getId());
 
-        assertEquals(1, userService.getUserFriends(user.getId()).size());
-        assertEquals(1, userService.getUserFriends(user2.getId()).size());
+        assertEquals(1, userServiceImpl.getUserFriends(user.getId()).size());
+        assertEquals(1, userServiceImpl.getUserFriends(user2.getId()).size());
     }
 
     @Test
@@ -112,14 +113,14 @@ class UserServiceTest {
         user2.setLogin("Test456");
         user2.setEmail("test@456.com");
         user2.setBirthday(LocalDate.of(1990, 11, 4));
-        userService.create(user);
-        userService.create(user2);
-        userService.addFriend(user.getId(), user2.getId());
+        userServiceImpl.create(user);
+        userServiceImpl.create(user2);
+        userServiceImpl.addFriend(user.getId(), user2.getId());
 
-        userService.removeFriend(user.getId(), user2.getId());
+        userServiceImpl.removeFriend(user.getId(), user2.getId());
 
-        assertEquals(0, userService.getUserFriends(user.getId()).size());
-        assertEquals(0, userService.getUserFriends(user2.getId()).size());
+        assertEquals(0, userServiceImpl.getUserFriends(user.getId()).size());
+        assertEquals(0, userServiceImpl.getUserFriends(user2.getId()).size());
     }
 
     @Test
@@ -135,11 +136,11 @@ class UserServiceTest {
         user2.setLogin("Test456");
         user2.setEmail("test@456.com");
         user2.setBirthday(LocalDate.of(1990, 11, 4));
-        userService.create(user);
-        userService.create(user2);
-        userService.addFriend(user.getId(), user2.getId());
+        userServiceImpl.create(user);
+        userServiceImpl.create(user2);
+        userServiceImpl.addFriend(user.getId(), user2.getId());
 
-        List<User> userFriends = new ArrayList<>(userService.getUserFriends(user.getId()));
+        List<User> userFriends = new ArrayList<>(userServiceImpl.getUserFriends(user.getId()));
 
         assertEquals(1, userFriends.size());
         assertEqualsUsers(user2, userFriends.getFirst());
@@ -163,13 +164,13 @@ class UserServiceTest {
         user3.setLogin("Test789");
         user3.setEmail("test@789.com");
         user3.setBirthday(LocalDate.of(1992, 8, 14));
-        userService.create(user);
-        userService.create(user2);
-        userService.create(user3);
-        userService.addFriend(user2.getId(), user.getId());
-        userService.addFriend(user3.getId(), user.getId());
+        userServiceImpl.create(user);
+        userServiceImpl.create(user2);
+        userServiceImpl.create(user3);
+        userServiceImpl.addFriend(user2.getId(), user.getId());
+        userServiceImpl.addFriend(user3.getId(), user.getId());
 
-        List<User> userCommonFriends = new ArrayList<>(userService.getCommonFriends(user2.getId(), user3.getId()));
+        List<User> userCommonFriends = new ArrayList<>(userServiceImpl.getCommonFriends(user2.getId(), user3.getId()));
 
         assertEquals(1, userCommonFriends.size());
         assertEqualsUsers(user, userCommonFriends.getFirst());
