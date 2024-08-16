@@ -6,7 +6,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.Update;
+import ru.yandex.practicum.filmorate.annotation.Update;
 
 import java.time.LocalDate;
 import java.util.Set;
