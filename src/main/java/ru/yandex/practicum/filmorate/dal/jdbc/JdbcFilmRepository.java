@@ -251,7 +251,7 @@ public class JdbcFilmRepository implements FilmRepository {
         film.setDuration(rs.getInt("duration"));
 
         LocalDate releaseDate = null;
-        if(rs.getDate("release_date") != null) {
+        if (rs.getDate("release_date") != null) {
             releaseDate = rs.getDate("release_date").toLocalDate();
         }
         film.setReleaseDate(releaseDate);
