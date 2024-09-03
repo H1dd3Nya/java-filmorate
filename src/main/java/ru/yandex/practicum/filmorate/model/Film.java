@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.annotation.ReleaseDate;
 import ru.yandex.practicum.filmorate.annotation.Update;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 

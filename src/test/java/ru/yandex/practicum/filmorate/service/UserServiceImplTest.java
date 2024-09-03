@@ -2,9 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.dal.mem.InMemoryUserRepository;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
-import ru.yandex.practicum.filmorate.dal.mem.InMemoryUserRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

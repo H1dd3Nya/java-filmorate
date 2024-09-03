@@ -2,20 +2,17 @@ package ru.yandex.practicum.filmorate.service;
 
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.dal.GenreRepository;
-import ru.yandex.practicum.filmorate.dal.MpaRepository;
+import ru.yandex.practicum.filmorate.dal.UserRepository;
+import ru.yandex.practicum.filmorate.dal.mem.InMemoryFilmRepository;
 import ru.yandex.practicum.filmorate.dal.mem.InMemoryGenreRepository;
 import ru.yandex.practicum.filmorate.dal.mem.InMemoryMpaRepository;
+import ru.yandex.practicum.filmorate.dal.mem.InMemoryUserRepository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl;
-import ru.yandex.practicum.filmorate.dal.mem.InMemoryFilmRepository;
-import ru.yandex.practicum.filmorate.dal.mem.InMemoryUserRepository;
-import ru.yandex.practicum.filmorate.dal.UserRepository;
 
 import java.time.LocalDate;
 import java.util.HashSet;
