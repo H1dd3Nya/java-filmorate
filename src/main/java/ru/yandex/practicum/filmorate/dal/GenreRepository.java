@@ -8,5 +8,6 @@ import java.util.Optional;
 public interface GenreRepository {
 
     Optional<Genre> getById(Long id);
+
     List<Genre> getAll();
 }
