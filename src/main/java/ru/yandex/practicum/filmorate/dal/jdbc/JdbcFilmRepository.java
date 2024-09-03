@@ -44,8 +44,8 @@ public class JdbcFilmRepository implements FilmRepository {
             List<GenreRelation> genresList = new ArrayList<>();
             while (rs.next()) {
                 GenreRelation relation = new GenreRelation();
-                relation.setFilm_id(rs.getLong("film_id"));
-                relation.setGenre_id(rs.getLong("genre_id"));
+                relation.setFilmId(rs.getLong("film_id"));
+                relation.setGenreId(rs.getLong("genre_id"));
                 genresList.add(relation);
             }
             return genresList;
@@ -53,10 +53,10 @@ public class JdbcFilmRepository implements FilmRepository {
 
         List<Film> allFilms = new ArrayList<>();
         for (GenreRelation relation : relations) {
-            films.get(relation.getFilm_id())
+            films.get(relation.getFilmId())
                     .getGenres()
-                    .add(genres.get(relation.getGenre_id()));
-            allFilms.add(films.get(relation.getFilm_id()));
+                    .add(genres.get(relation.getGenreId()));
+            allFilms.add(films.get(relation.getFilmId()));
         }
 
         return allFilms;
@@ -107,15 +107,15 @@ public class JdbcFilmRepository implements FilmRepository {
         List<GenreRelation> genreRelations = new ArrayList<>();
         for (Genre genre : film.getGenres()) {
             GenreRelation relation = new GenreRelation();
-            relation.setGenre_id(genre.getId());
-            relation.setFilm_id(film.getId());
+            relation.setGenreId(genre.getId());
+            relation.setFilmId(film.getId());
             genreRelations.add(relation);
         }
 
         List<Like> likes = new ArrayList<>();
-        for (Long user_id : film.getLikes()) {
+        for (Long userId : film.getLikes()) {
             Like like = new Like();
-            like.setUserId(user_id);
+            like.setUserId(userId);
             like.setFilmId(film.getId());
             likes.add(like);
         }
