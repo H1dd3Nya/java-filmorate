@@ -16,7 +16,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/users")
 @Slf4j
-public class UserController {
+public class  UserController {
     private final UserService userService;
 
     @Autowired
@@ -50,19 +50,19 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public User addFriend(
+    public void addFriend(
             @PathVariable("id") Long userId,
             @PathVariable("friendId") Long friendId
     ) {
-        return userService.addFriend(userId, friendId);
+        userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public User removeFriend(
+    public void removeFriend(
             @PathVariable("id") Long userId,
             @PathVariable("friendId") Long friendId
     ) {
-        return userService.removeFriend(userId, friendId);
+        userService.removeFriend(userId, friendId);
     }
 
     @GetMapping("/{id}/friends")

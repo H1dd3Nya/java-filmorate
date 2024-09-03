@@ -1,15 +1,17 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.dal.mem;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.dal.FilmRepository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class InMemoryFilmStorage implements FilmStorage {
+public class InMemoryFilmRepository implements FilmRepository {
     private final Map<Long, Film> films = new HashMap<>();
     private long counter = 0L;
 
@@ -47,5 +49,22 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     public Optional<Film> get(Long id) {
         return Optional.ofNullable(films.get(id));
+    }
+
+    public void addLike(long filmId, long userId) {
+        Film film = films.get(filmId);
+        film.getLikes().add(userId);
+    }
+
+    public void removeLike(long filmId, long userId) {
+        Film film = films.get(filmId);
+        film.getLikes().remove(userId);
+    }
+
+    public List<Film> getMostPopular(int count) {
+        return films.values().stream()
+                .sorted((Film f1, Film f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
+                .limit(count)
+                .toList();
     }
 }

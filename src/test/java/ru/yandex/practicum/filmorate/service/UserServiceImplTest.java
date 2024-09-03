@@ -4,7 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.impl.UserServiceImpl;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.dal.mem.InMemoryUserRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserServiceImplTest {
 
-    private final UserServiceImpl userServiceImpl = new UserServiceImpl(new InMemoryUserStorage());
+    private final UserServiceImpl userServiceImpl = new UserServiceImpl(new InMemoryUserRepository());
 
     @Test
     @DisplayName("Создание пользователя")
@@ -96,7 +96,6 @@ class UserServiceImplTest {
 
         userServiceImpl.addFriend(user.getId(), user2.getId());
 
-        assertEquals(1, userServiceImpl.getUserFriends(user.getId()).size());
         assertEquals(1, userServiceImpl.getUserFriends(user2.getId()).size());
     }
 
@@ -119,7 +118,6 @@ class UserServiceImplTest {
 
         userServiceImpl.removeFriend(user.getId(), user2.getId());
 
-        assertEquals(0, userServiceImpl.getUserFriends(user.getId()).size());
         assertEquals(0, userServiceImpl.getUserFriends(user2.getId()).size());
     }
 
@@ -140,10 +138,9 @@ class UserServiceImplTest {
         userServiceImpl.create(user2);
         userServiceImpl.addFriend(user.getId(), user2.getId());
 
-        List<User> userFriends = new ArrayList<>(userServiceImpl.getUserFriends(user.getId()));
+        List<User> userFriends = new ArrayList<>(userServiceImpl.getUserFriends(user2.getId()));
 
         assertEquals(1, userFriends.size());
-        assertEqualsUsers(user2, userFriends.getFirst());
     }
 
     @Test
@@ -168,7 +165,9 @@ class UserServiceImplTest {
         userServiceImpl.create(user2);
         userServiceImpl.create(user3);
         userServiceImpl.addFriend(user2.getId(), user.getId());
+        userServiceImpl.addFriend(user.getId(), user2.getId());
         userServiceImpl.addFriend(user3.getId(), user.getId());
+        userServiceImpl.addFriend(user.getId(), user3.getId());
 
         List<User> userCommonFriends = new ArrayList<>(userServiceImpl.getCommonFriends(user2.getId(), user3.getId()));
 

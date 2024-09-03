@@ -1,13 +1,15 @@
 package ru.yandex.practicum.filmorate.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.UserRepository;
+import ru.yandex.practicum.filmorate.exception.InvalidTargetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -15,83 +17,82 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
+
+    public UserServiceImpl(@Qualifier("JdbcUserRepository") UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public List<User> getAll() {
-        return userStorage.getAll();
+        return userRepository.getAll();
     }
 
     @Override
     public User create(User user) {
-        return userStorage.create(user);
+        return userRepository.create(user);
     }
 
     @Override
     public User get(Long userId) {
-        return userStorage.get(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        return userRepository.get(userId).orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     @Override
     public User update(User user) {
-        return userStorage.update(user);
+        final User u = userRepository.get(user.getId()).orElseThrow(() -> new NotFoundException("User not found"));
+
+        u.setName(user.getName());
+        u.setEmail(user.getEmail());
+        u.setLogin(user.getLogin());
+        u.setBirthday(user.getBirthday());
+        u.setFriends(new HashSet<>(user.getFriends()));
+
+        return userRepository.update(user);
     }
 
     @Override
     public void delete(User user) {
-        userStorage.delete(user);
+        userRepository.delete(user);
     }
 
     @Override
-    public User addFriend(Long userId, Long friendId) {
-        User user = userStorage.get(userId).orElseThrow(() -> new NotFoundException("User not found"));
-        user.getFriends().add(friendId);
+    public void addFriend(Long userId, Long friendId) {
+        if (userId.equals(friendId)) {
+            throw new InvalidTargetException("User can not be friend to himself");
+        }
 
-        User newFriend = userStorage.get(friendId).orElseThrow(() -> new NotFoundException("User not found"));
-        newFriend.getFriends().add(user.getId());
+        userRepository.get(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        userRepository.get(friendId).orElseThrow(() -> new NotFoundException("Friend not found"));
 
-        userStorage.update(user);
-        userStorage.update(newFriend);
-
-        return user;
+        userRepository.addFriend(friendId, userId);
     }
 
     @Override
-    public User removeFriend(Long userId, Long friendId) {
-        User user = userStorage.get(userId).orElseThrow(() -> new NotFoundException("User not found"));
-        user.getFriends().remove(friendId);
+    public void removeFriend(Long userId, Long friendId) {
+        userRepository.get(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        userRepository.get(friendId).orElseThrow(() -> new NotFoundException("Friend not found"));
 
-        User oldFriend = userStorage.get(friendId).orElseThrow(() -> new NotFoundException("User not found"));
-        oldFriend.getFriends().remove(user.getId());
-
-        userStorage.update(user);
-        userStorage.update(oldFriend);
-
-        return user;
+        userRepository.removeFriend(userId, friendId);
     }
 
     @Override
     public Set<User> getUserFriends(Long id) {
-        User user = userStorage.get(id).orElseThrow(() -> new NotFoundException("User not found"));
+        userRepository.get(id).orElseThrow(() -> new NotFoundException("User not found"));
 
-        return user.getFriends().stream()
-                .map(userStorage::get)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toSet());
+        return userRepository.getFriends(id);
     }
 
     @Override
     public Set<User> getCommonFriends(Long userId, Long otherId) {
-        User user = userStorage.get(userId).orElseThrow(() -> new NotFoundException("User not found"));
-        User otherUser = userStorage.get(otherId).orElseThrow(() -> new NotFoundException("User not found"));
+        User user = userRepository.get(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        User otherUser = userRepository.get(otherId).orElseThrow(() -> new NotFoundException("User not found"));
 
         return user.getFriends().stream()
                 .filter(friend -> !friend.equals(otherId))
                 .filter(friend -> otherUser.getFriends().contains(friend))
-                .map(userStorage::get)
+                .map(userRepository::get)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toSet());
