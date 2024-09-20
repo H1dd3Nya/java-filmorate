@@ -96,7 +96,7 @@ class UserServiceImplTest {
 
         userServiceImpl.addFriend(user.getId(), user2.getId());
 
-        assertEquals(1, userServiceImpl.getUserFriends(user2.getId()).size());
+        assertEquals(1, userServiceImpl.getUserFriends(user.getId()).size());
     }
 
     @Test
@@ -138,7 +138,7 @@ class UserServiceImplTest {
         userServiceImpl.create(user2);
         userServiceImpl.addFriend(user.getId(), user2.getId());
 
-        List<User> userFriends = new ArrayList<>(userServiceImpl.getUserFriends(user2.getId()));
+        List<User> userFriends = new ArrayList<>(userServiceImpl.getUserFriends(user.getId()));
 
         assertEquals(1, userFriends.size());
     }

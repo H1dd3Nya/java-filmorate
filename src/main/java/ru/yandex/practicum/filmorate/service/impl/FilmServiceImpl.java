@@ -52,13 +52,13 @@ public class FilmServiceImpl implements FilmService {
 
         isGenreExist(film);
 
-        if (film.getLikes() == null) {
-            film.setLikes(new LinkedHashSet<>());
-        }
-
-        if (film.getGenres() == null) {
-            film.setGenres(new LinkedHashSet<>());
-        }
+//        if (film.getLikes() == null) {
+//            film.setLikes(new LinkedHashSet<>());
+//        }
+//
+//        if (film.getGenres() == null) {
+//            film.setGenres(new LinkedHashSet<>());
+//        }
 
         return filmRepository.create(film);
     }

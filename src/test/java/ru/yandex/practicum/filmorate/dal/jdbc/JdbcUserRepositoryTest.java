@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @JdbcTest
-@Import(JdbcUserRepository.class)
+@Import({JdbcUserRepository.class, JdbcMpaRepository.class, JdbcGenreRepository.class, JdbcFilmRepository.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DisplayName("JdbcUserRepository")
 class JdbcUserRepositoryTest {

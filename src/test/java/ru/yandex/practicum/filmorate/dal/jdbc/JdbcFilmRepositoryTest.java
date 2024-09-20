@@ -32,10 +32,17 @@ class JdbcFilmRepositoryTest {
     static Film getTestFilm() {
         Film film = new Film();
         film.setId(TEST_FILM_ID);
-        film.setName("test1");
-        film.setDescription("test1");
+        film.setName("test name");
+        film.setDescription("test film");
         film.setDuration(180);
-        film.setReleaseDate(LocalDate.of(1999, 1, 10));
+        film.setReleaseDate(null);
+
+        Mpa mpa = new Mpa();
+        mpa.setId(2L);
+        mpa.setName("PG");
+        film.setMpa(mpa);
+
+        film.setLikes(new HashSet<>());
 
         film.setGenres(new LinkedHashSet<>());
         Genre genre = new Genre();
@@ -67,6 +74,7 @@ class JdbcFilmRepositoryTest {
     public void getAll_shouldReturnAllFilms() {
         List<Film> films = filmRepository.getAll();
 
+        System.out.println(films);
         assertEquals(1, films.size());
         assertThat(films.getFirst())
                 .usingRecursiveComparison()
@@ -77,13 +85,13 @@ class JdbcFilmRepositoryTest {
     @DisplayName("Создание фильма")
     public void create_shouldCreateFilm() {
         Film film = new Film();
-        film.setName("user2");
+        film.setName("test2");
         film.setDescription("test2");
         film.setDuration(180);
         film.setReleaseDate(LocalDate.of(1999, 1, 11));
         Mpa mpa = new Mpa();
         mpa.setId(2L);
-        mpa.setName("null");
+        mpa.setName("PG");
         film.setMpa(mpa);
 
         film.setLikes(new HashSet<>());
@@ -92,7 +100,6 @@ class JdbcFilmRepositoryTest {
         Film filmCreated = filmRepository.create(film);
         assertThat(filmCreated)
                 .usingRecursiveComparison()
-                .ignoringFields("id")
                 .isEqualTo(film);
     }
 
@@ -100,6 +107,7 @@ class JdbcFilmRepositoryTest {
     @DisplayName("Обновление фильма")
     public void update_shouldUpdateFilm() {
         Film film = getTestFilm();
+        film.setId(TEST_FILM_ID);
         film.setName("updated name");
         film.setReleaseDate(LocalDate.of(1998, 11, 24));
 
@@ -141,11 +149,24 @@ class JdbcFilmRepositoryTest {
     public void getPopularFilms_shouldReturnListOfPopularFilms() {
         Film film = getTestFilm();
         filmRepository.addLike(film.getId(), 1L);
-        Film film2 = getTestFilm();
-        film2.setId(2L);
+
+        Film film2 = new Film();
+        film2.setName("test2");
+        film2.setDescription("test2");
+        film2.setDuration(180);
+        film2.setReleaseDate(LocalDate.of(1999, 1, 11));
+        Mpa mpa = new Mpa();
+        mpa.setId(2L);
+        mpa.setName("PG");
+        film2.setMpa(mpa);
+        film2.setLikes(new HashSet<>());
+        film2.setGenres(new LinkedHashSet<>());
+
         filmRepository.create(film2);
+        filmRepository.addLike(film2.getId(), 1L);
 
         List<Film> films = filmRepository.getMostPopular(10);
+        film = filmRepository.get(TEST_FILM_ID).orElseThrow(() -> new NotFoundException("Film not found"));
 
         assertEquals(2, films.size());
         assertThat(films.getFirst())
