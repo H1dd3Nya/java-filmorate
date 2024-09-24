@@ -59,7 +59,7 @@ public class JdbcFilmRepository implements FilmRepository {
                    g."name" AS genre_name
             FROM "films" AS f
             LEFT OUTER JOIN "film_likes" AS fl ON f."id" = fl."film_id"
-            LEFT OUTER JOIN "mpa" AS rating ON f."mpa" = rating."id"
+                LEFT OUTER JOIN "mpa" AS rating ON f."mpa_id" = rating."id"
             LEFT OUTER JOIN "film_genres" AS fg ON f."id" = fg."film_id"
             LEFT OUTER JOIN "genres" AS g ON fg."genre_id" = g."id"
             WHERE f."id"=:id;""";
@@ -100,34 +100,35 @@ public class JdbcFilmRepository implements FilmRepository {
                        rating."name" AS rating_name,
                        fl."user_id" AS likes
                 FROM "films" AS f
-                LEFT OUTER JOIN "mpa" AS rating ON f."mpa" = rating."id"
+                LEFT OUTER JOIN "mpa" AS rating ON f."mpa_id" = rating."id"
                 LEFT OUTER JOIN "film_likes" AS fl ON f."id" = fl."film_id\"""";
-        String genresQuery = "SELECT * FROM \"genres\";";
-        String relationsQuery = "SELECT * FROM \"film_genres\";";
 
-        Map<Long, Genre> genres = jdbc.query(genresQuery, JdbcFilmRepository::extractGenres);
+        String filmGenresQuery = """
+                SELECT fg."film_id",
+                       g."id" AS genre_id,
+                       g."name" AS genre_name
+                FROM "film_genres" AS fg
+                LEFT OUTER JOIN "genres" as g ON fg."genre_id"=g."id"
+                """;
+
         Map<Long, Film> films = jdbc.query(filmsWithLikesQuery, JdbcFilmRepository::extractFilms);
 
-        List<GenreRelation> relations = jdbc.query(relationsQuery, (ResultSet rs) -> {
-            List<GenreRelation> genresList = new ArrayList<>();
+        return jdbc.query(filmGenresQuery, (ResultSet rs) -> {
+            Set<Film> allFilms = new LinkedHashSet<>();
             while (rs.next()) {
-                GenreRelation relation = new GenreRelation();
-                relation.setFilmId(rs.getLong("film_id"));
-                relation.setGenreId(rs.getLong("genre_id"));
-                genresList.add(relation);
+
+                Genre genre = new Genre();
+                genre.setId(rs.getLong("genre_id"));
+                genre.setName(rs.getString("genre_name"));
+
+                Film film = films.get(rs.getLong("film_id"));
+                film.getGenres().add(genre);
+
+                allFilms.add(film);
             }
-            return genresList;
+
+            return new ArrayList<>(allFilms);
         });
-
-        Set<Film> allFilms = new LinkedHashSet<>();
-        for (GenreRelation relation : relations) {
-            films.get(relation.getFilmId())
-                    .getGenres()
-                    .add(genres.get(relation.getGenreId()));
-            allFilms.add(films.get(relation.getFilmId()));
-        }
-
-        return new ArrayList<>(allFilms);
     }
 
     @Override
@@ -143,8 +144,8 @@ public class JdbcFilmRepository implements FilmRepository {
 
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         String filmUpdateQuery = """
-                INSERT INTO "films"("name", "description", "release_date", "duration", "mpa")
-                VALUES ( :name, :description, :releaseDate, :duration, :mpa );""";
+                INSERT INTO "films"("name", "description", "release_date", "duration", "mpa_id")
+                VALUES ( :name, :description, :releaseDate, :duration, :mpaId );""";
         String insertGenres = "INSERT INTO \"film_genres\" (\"film_id\", \"genre_id\")\n" +
                 "    VALUES (:filmId, :genreId);";
         String insertLikes = "INSERT INTO \"film_likes\"(\"film_id\", \"user_id\")\n" +
@@ -184,7 +185,7 @@ public class JdbcFilmRepository implements FilmRepository {
     public Film update(Film film) {
         String filmUpdateQuery = """
                 UPDATE "films" SET "name" = :name, "description" = :description, "release_date" = :releaseDate,
-                    "duration" = :duration, "mpa" = :mpa WHERE "id"= :filmId;""";
+                    "duration" = :duration, "mpa_id" = :mpaId WHERE "id"= :filmId;""";
         String insertGenres = """
                 INSERT INTO "film_genres" ("film_id", "genre_id")
                 VALUES ( :filmId, :genreId );""";
@@ -222,9 +223,6 @@ public class JdbcFilmRepository implements FilmRepository {
             jdbc.batchUpdate(insertLikes, SqlParameterSourceUtils.createBatch(likes));
         }
 
-//        jdbc.batchUpdate(insertGenres, SqlParameterSourceUtils.createBatch(film.getGenres()));
-//        jdbc.batchUpdate(insertLikes, SqlParameterSourceUtils.createBatch(film.getLikes()));
-
         return get(film.getId()).orElseThrow(() -> new NotFoundException("Film not found"));
     }
 
@@ -248,7 +246,7 @@ public class JdbcFilmRepository implements FilmRepository {
                   LIMIT (:count)) AS best_rating
             LEFT OUTER JOIN "films" AS f ON best_rating."film_id"=f."id"
             LEFT OUTER JOIN "film_likes" AS fl ON f."id" = fl."film_id"
-            LEFT OUTER JOIN "mpa" AS rating ON f."mpa" = rating."id"
+                LEFT OUTER JOIN "mpa" AS rating ON f."mpa_id" = rating."id"
             LEFT OUTER JOIN "film_genres" AS fg ON f."id" = fg."film_id"
             LEFT OUTER JOIN "genres" AS g ON fg."genre_id" = g."id";""";
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -354,21 +352,8 @@ public class JdbcFilmRepository implements FilmRepository {
         params.addValue("description", film.getDescription());
         params.addValue("releaseDate", film.getReleaseDate());
         params.addValue("duration", film.getDuration());
-        params.addValue("mpa", film.getMpa().getId());
+        params.addValue("mpaId", film.getMpa().getId());
 
         return params;
     }
-
-    private static Map<Long, Genre> extractGenres(ResultSet rs) throws SQLException {
-        Map<Long, Genre> map = new LinkedHashMap<>();
-        while (rs.next()) {
-            Genre genre = new Genre();
-            genre.setId(rs.getLong("id"));
-            genre.setName(rs.getString("name"));
-            map.put(genre.getId(), genre);
-        }
-
-        return map;
-    }
-
 }

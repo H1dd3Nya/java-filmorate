@@ -26,8 +26,8 @@ public class FilmServiceImpl implements FilmService {
 
     public FilmServiceImpl(@Qualifier("JdbcFilmRepository") FilmRepository filmRepository,
                            @Qualifier("JdbcUserRepository") UserRepository userRepository,
-                           @Qualifier("JdbcGenreRepository")GenreRepository genreRepository,
-                           @Qualifier("JdbcMpaRepository")MpaRepository mpaRepository) {
+                           @Qualifier("JdbcGenreRepository") GenreRepository genreRepository,
+                           @Qualifier("JdbcMpaRepository") MpaRepository mpaRepository) {
         this.filmRepository = filmRepository;
         this.userRepository = userRepository;
         this.genreRepository = genreRepository;
@@ -51,14 +51,6 @@ public class FilmServiceImpl implements FilmService {
                 .orElseThrow(() -> new IllegalArgumentException("Mpa not found"));
 
         isGenreExist(film);
-
-//        if (film.getLikes() == null) {
-//            film.setLikes(new LinkedHashSet<>());
-//        }
-//
-//        if (film.getGenres() == null) {
-//            film.setGenres(new LinkedHashSet<>());
-//        }
 
         return filmRepository.create(film);
     }

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dal.jdbc;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Primary
 @Repository("JdbcMpaRepository")
 @RequiredArgsConstructor
 public class JdbcMpaRepository implements MpaRepository {

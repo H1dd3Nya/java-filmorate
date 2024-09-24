@@ -21,19 +21,17 @@ CREATE TABLE IF NOT EXISTS "films"
     "description"  varchar(200),
     "release_date" date,
     "duration"     integer,
-    "mpa"       integer
+    "mpa_id" integer
     );
 
 CREATE TABLE IF NOT EXISTS "film_likes"
 (
-    "id"   integer PRIMARY KEY AUTO_INCREMENT,
     "film_id"  integer,
     "user_id" integer
 );
 
 CREATE TABLE IF NOT EXISTS "film_genres"
 (
-    "id"   integer PRIMARY KEY AUTO_INCREMENT,
     "film_id"  integer,
     "genre_id" integer
 );
@@ -60,10 +58,10 @@ ALTER TABLE "film_genres"
     ADD FOREIGN KEY ("genre_id") REFERENCES "genres" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "films"
-    ADD FOREIGN KEY ("mpa") REFERENCES "mpa" ("id") ON DELETE CASCADE;
+    ADD FOREIGN KEY ("mpa_id") REFERENCES "mpa" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "films"
-    ADD FOREIGN KEY ("mpa") REFERENCES "mpa" ("id") ON DELETE CASCADE;
+    ADD FOREIGN KEY ("mpa_id") REFERENCES "mpa" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "film_likes"
     ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
