@@ -1,86 +1,134 @@
 package ru.yandex.practicum.filmorate.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.GenreRepository;
+import ru.yandex.practicum.filmorate.dal.MpaRepository;
+import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class FilmServiceImpl implements FilmService {
-    private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    private final FilmRepository filmRepository;
+    private final UserRepository userRepository;
+    private final GenreRepository genreRepository;
+    private final MpaRepository mpaRepository;
+
+    public FilmServiceImpl(@Qualifier("JdbcFilmRepository") FilmRepository filmRepository,
+                           @Qualifier("JdbcUserRepository") UserRepository userRepository,
+                           @Qualifier("JdbcGenreRepository") GenreRepository genreRepository,
+                           @Qualifier("JdbcMpaRepository") MpaRepository mpaRepository) {
+        this.filmRepository = filmRepository;
+        this.userRepository = userRepository;
+        this.genreRepository = genreRepository;
+        this.mpaRepository = mpaRepository;
+    }
 
     @Override
     public List<Film> getAll() {
-        return filmStorage.getAll();
+        return filmRepository.getAll();
     }
 
     @Override
     public Film get(Long filmId) {
-        return filmStorage.get(filmId).orElseThrow(() -> new NotFoundException("Film not found"));
+        return filmRepository.get(filmId).orElseThrow(() -> new NotFoundException("Film not found"));
     }
 
     @Override
     public Film create(Film film) {
-        return filmStorage.create(film);
+        mpaRepository.getById(film.getMpa()
+                .getId())
+                .orElseThrow(() -> new IllegalArgumentException("Mpa not found"));
+
+        isGenreExist(film);
+
+        return filmRepository.create(film);
     }
 
     @Override
     public Film update(Film film) {
-        return filmStorage.update(film);
+        Film f = filmRepository.get(film.getId()).orElseThrow(() -> new NotFoundException("Film not found"));
+
+        Mpa mpa = mpaRepository.getById(f.getMpa()
+                .getId())
+                .orElseThrow(() -> new IllegalArgumentException("Mpa not found"));
+
+        isGenreExist(f);
+
+        f.setName(film.getName());
+        f.setDescription(film.getDescription());
+        f.setReleaseDate(film.getReleaseDate());
+        f.setDuration(film.getDuration());
+        f.setMpa(mpa);
+
+        if (film.getLikes() == null) {
+            film.setLikes(new LinkedHashSet<>());
+        }
+
+        if (film.getGenres() == null) {
+            film.setGenres(new LinkedHashSet<>());
+        }
+
+        return filmRepository.update(film);
     }
 
     @Override
     public void delete(Film film) {
-        filmStorage.delete(film);
+        filmRepository.delete(film);
     }
 
     @Override
-    public Film addLike(Long filmId, Long userId) {
-        Film film = filmStorage.get(filmId).orElseThrow(() -> new NotFoundException("Film not found"));
+    public void addLike(Long filmId, Long userId) {
+        filmRepository.get(filmId).orElseThrow(() -> new NotFoundException("Film not found"));
 
         if (!isUserExist(userId)) {
             throw new NotFoundException("User not found");
         }
 
-        film.getLikes().add(userId);
-        filmStorage.update(film);
-
-        return film;
+        filmRepository.addLike(filmId, userId);
     }
 
     @Override
-    public Film removeLike(Long filmId, Long userId) {
-        Film film = filmStorage.get(filmId).orElseThrow(() -> new NotFoundException("Film not found"));
+    public void removeLike(Long filmId, Long userId) {
+        filmRepository.get(filmId).orElseThrow(() -> new NotFoundException("Film not found"));
 
         if (!isUserExist(userId)) {
             throw new NotFoundException("User not found");
         }
 
-        film.getLikes().remove(userId);
-        filmStorage.update(film);
-
-        return film;
+        filmRepository.removeLike(filmId, userId);
     }
 
     @Override
     public List<Film> getPopularFilms(int count) {
-        return filmStorage.getAll().stream()
-                .sorted((Film f1, Film f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmRepository.getMostPopular(count);
     }
 
     private boolean isUserExist(Long id) {
-        return userStorage.get(id).isPresent();
+        return userRepository.get(id).isPresent();
+    }
+
+    private void isGenreExist(Film film) {
+        List<Long> genreIds = null;
+        if (film.getGenres() != null) {
+            genreIds = film.getGenres().stream().map(Genre::getId).toList();
+        }
+
+        if (genreIds != null) {
+            for (Long id : genreIds) {
+                genreRepository.getById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Genre not found"));
+            }
+        }
     }
 }

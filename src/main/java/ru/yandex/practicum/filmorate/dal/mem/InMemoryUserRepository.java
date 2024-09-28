@@ -1,15 +1,17 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.dal.mem;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class InMemoryUserStorage implements UserStorage {
+public class InMemoryUserRepository implements UserRepository {
     private final Map<Long, User> users = new HashMap<>();
     private long counter = 1L;
 
@@ -51,5 +53,32 @@ public class InMemoryUserStorage implements UserStorage {
 
     public Optional<User> get(Long id) {
         return Optional.ofNullable(users.get(id));
+    }
+
+    public void addFriend(Long user, Long target) {
+        users.get(target).getFriends().add(user);
+    }
+
+    public void removeFriend(Long user, Long target) {
+        users.get(target).getFriends().remove(user);
+    }
+
+    public Set<User> getFriends(Long id) {
+        return users.get(id).getFriends()
+                .stream()
+                .map(this::get)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<User> getCommonFriends(Long user, Long target) {
+        return users.get(user).getFriends().stream()
+                .filter(friend -> !friend.equals(target))
+                .filter(friend -> users.get(target).getFriends().contains(friend))
+                .map(this::get)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
     }
 }
